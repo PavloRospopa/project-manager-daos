@@ -8,5 +8,5 @@ public interface EmployeeDao extends Dao<Long, Employee> {
     List<Employee> findByTaskId(Long id);
     List<Employee> findByProjectId(Long id);
 
-    void updatePosition(Long employeeId, Employee.Position position);
+    void updatePosition(Employee.Position position, Long employeeId);
 }

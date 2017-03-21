@@ -4,7 +4,7 @@ import com.gmail.at.rospopa.pavlo.projectmanager.util.PropertiesLoader;
 
 import java.util.Properties;
 
-public abstract class AbstractJdbcDao {
+abstract class AbstractJdbcDao {
 
     private static final String DELETE_FROM_OBJECTS_SQL = "DELETE FROM objects WHERE object_id=?";
     private static final String DELETE_FROM_REFS_SQL = "DELETE FROM refs WHERE object_id=?";
@@ -31,7 +31,7 @@ public abstract class AbstractJdbcDao {
 
     protected static final String PK_COLUMN_NAME = "object_id";
 
-    protected static Properties metamodelProp = PropertiesLoader.getInstance().getMetamodelProperties();
+    protected static Properties METAMODEL_PROP = PropertiesLoader.getInstance().getMetamodelProperties();
 
     protected JdbcTemplate jdbcTemplate;
 

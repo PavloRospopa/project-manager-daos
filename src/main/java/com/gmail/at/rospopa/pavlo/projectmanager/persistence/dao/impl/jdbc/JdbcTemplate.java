@@ -2,6 +2,7 @@ package com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc;
 
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc.exception.RuntimeSqlException;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc.mapper.Mapper;
+import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc.util.ConnectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,13 +13,15 @@ import java.util.List;
 public class JdbcTemplate {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private Connection connection;
+    private ConnectionManager connectionManager;
 
-    public JdbcTemplate(Connection connection) {
-        this.connection = connection;
+    public JdbcTemplate(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
     }
 
     public <T> List<T> executeQuery(Mapper<T> mapper, String query, Object... params) {
+        Connection connection = connectionManager.getConnection();
+
         if (connection == null) {
             throw new RuntimeSqlException();
         }
@@ -33,6 +36,8 @@ public class JdbcTemplate {
         } catch (SQLException e) {
             LOGGER.error("SQL exception during executing query to database", e);
             throw new RuntimeSqlException();
+        } finally {
+            connectionManager.close(connection);
         }
 
         if (entities.isEmpty()) {
@@ -42,11 +47,13 @@ public class JdbcTemplate {
     }
 
     public Long executeInsert(String insertQuery, String columnName, Object... params) {
+        Connection connection = connectionManager.getConnection();
+
         if (connection == null) {
             throw new RuntimeSqlException();
         }
 
-        try (PreparedStatement stmt = connection.prepareStatement(insertQuery, new String[]{ columnName })) {
+        try (PreparedStatement stmt = connection.prepareStatement(insertQuery, new String[]{columnName})) {
             setParams(stmt, params);
             stmt.executeUpdate();
             ResultSet rs = stmt.getGeneratedKeys();
@@ -56,12 +63,16 @@ public class JdbcTemplate {
         } catch (SQLException e) {
             LOGGER.error("SQL exception during inserting data to database", e);
             throw new RuntimeSqlException();
+        } finally {
+            connectionManager.close(connection);
         }
 
         return null;
     }
 
     public int executeUpdate(String updateQuery, Object... params) {
+        Connection connection = connectionManager.getConnection();
+
         if (connection == null) {
             throw new RuntimeSqlException();
         }
@@ -73,6 +84,8 @@ public class JdbcTemplate {
         } catch (SQLException e) {
             LOGGER.error("SQL exception during processing update query to database", e);
             throw new RuntimeSqlException();
+        } finally {
+            connectionManager.close(connection);
         }
 
         return updatedRows;

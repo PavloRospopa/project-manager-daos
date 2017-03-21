@@ -2,6 +2,7 @@ package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
 public class TaskTimeRequest extends Entity {
     private Task task;
+    private Employee employee;
     private int newEstimatedTime;
     private Status status;
 
@@ -16,9 +17,10 @@ public class TaskTimeRequest extends Entity {
         super(id);
     }
 
-    public TaskTimeRequest(Long id, Task task, int newEstimatedTime, Status status) {
+    public TaskTimeRequest(Long id, Task task, Employee employee, int newEstimatedTime, Status status) {
         super(id);
         this.task = task;
+        this.employee = employee;
         this.newEstimatedTime = newEstimatedTime;
         this.status = status;
     }
@@ -29,6 +31,14 @@ public class TaskTimeRequest extends Entity {
 
     public void setTask(Task task) {
         this.task = task;
+    }
+
+    public Employee getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
     public int getNewEstimatedTime() {
@@ -58,6 +68,8 @@ public class TaskTimeRequest extends Entity {
         if (newEstimatedTime != that.newEstimatedTime) return false;
         if (task != null ? (task.getId() != null ? !task.getId().equals(that.task.getId())
                 : that.task.getId() != null) : that.task != null) return false;
+        if (employee != null ? (employee.getId() != null ? !employee.getId().equals(that.employee.getId())
+                : that.employee.getId() != null) : that.employee != null) return false;
         return status == that.status;
     }
 
@@ -65,6 +77,7 @@ public class TaskTimeRequest extends Entity {
     public int hashCode() {
         int result = getId() != null ? getId().hashCode() : 0;
         result = 31 * result + (task != null ? (task.getId() != null ? task.getId().hashCode() : 0) : 0);
+        result = 31 * result + (employee != null ? (employee.getId() != null ? employee.getId().hashCode() : 0) : 0);
         result = 31 * result + newEstimatedTime;
         result = 31 * result + (status != null ? status.hashCode() : 0);
         return result;

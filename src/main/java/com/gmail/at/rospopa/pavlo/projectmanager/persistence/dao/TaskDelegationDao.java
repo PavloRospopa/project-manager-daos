@@ -6,8 +6,11 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public interface TaskDelegationDao extends Dao<Long, TaskDelegation> {
-    List<TaskDelegation> findByEmployeeId(Long id);
-    List<TaskDelegation> findByTaskId(Long id);
+    List<TaskDelegation> findAllByEmployeeId(Long id);
+    List<TaskDelegation> findByEmployeeId(Long id, TaskDelegation.Status status);
+
+    List<TaskDelegation> findAllByTaskId(Long id);
+    List<TaskDelegation> findByTaskId(Long id, TaskDelegation.Status status);
 
     void updateStatus(Long taskDelegationId, TaskDelegation.Status status);
     void updateStartDateTime(Long taskDelegationId, Timestamp startDateTime);

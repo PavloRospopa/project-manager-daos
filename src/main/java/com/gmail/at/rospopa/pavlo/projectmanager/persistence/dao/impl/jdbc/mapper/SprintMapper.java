@@ -18,6 +18,10 @@ public class SprintMapper implements Mapper<Sprint> {
         sprint.setCompletionDate(rs.getDate("completionDate"));
         sprint.setExpectedCompletionDate(rs.getDate("expectedCompletionDate"));
         sprint.setProject(new Project(rs.getLong("project_id")));
+        Long previousSprintId = rs.getLong("previousSprint_id");
+        if (!rs.wasNull()) {
+            sprint.setPreviousSprint(new Sprint(previousSprintId));
+        }
 
         return sprint;
     }

@@ -59,7 +59,7 @@ values (1, 0, 'status', 'Status attribute for Task, TaskDelegation and TaskTimeR
 insert into attributes (attr_type_id, is_multiple, NAME, DESCRIPTION)
 values (4, 0, 'task', 'Attribute for describing task that corresponds to given TaskDelegation or TaskTimeRequest object');
 insert into attributes (attr_type_id, is_multiple, NAME, DESCRIPTION)
-values (4, 0, 'employee', 'Attribute for describing employee that corresponds to given TaskDelegation object');
+values (4, 0, 'employee', 'Attribute for describing employee that corresponds to given TaskDelegation or TaskTimeRequest object');
 insert into attributes (attr_type_id, is_multiple, NAME, DESCRIPTION)
 values (3, 0, 'startDateTime', 'Date and time of starting solving task. Attribute of TaskDelegation class');
 insert into attributes (attr_type_id, is_multiple, NAME, DESCRIPTION)
@@ -161,6 +161,8 @@ insert into attr_binds(object_type_id, attr_id)
 values (5, 13);
 insert into attr_binds(object_type_id, attr_id)
 values (5, 14);
+insert into attr_binds(object_type_id, attr_id)
+values (5, 15);
 insert into attr_binds(object_type_id, attr_id)
 values (5, 18);
 
@@ -468,6 +470,8 @@ insert into params(object_id, attr_id, text_value)
 values(18, 13, 'REFUSED');
 insert into refs(object_id, attr_id, reference)
 values(18, 14, 10);
+insert into refs(object_id, attr_id, reference)
+values(18, 15, 12);
 insert into params(object_id, attr_id, number_value)
 values(18, 18, 15);
 

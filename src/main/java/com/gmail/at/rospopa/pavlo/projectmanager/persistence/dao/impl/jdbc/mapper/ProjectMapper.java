@@ -18,8 +18,14 @@ public class ProjectMapper implements Mapper<Project> {
         project.setStartDate(rs.getDate("startDate"));
         project.setCompletionDate(rs.getDate("completionDate"));
         project.setExpectedCompletionDate(rs.getDate("expectedCompletionDate"));
-        project.setCustomer(new Customer(rs.getLong("customer_id")));
-        project.setProjectManager(new ProjectManager(rs.getLong("project_manager_id")));
+        Long customerId = rs.getLong("customer_id");
+        if (!rs.wasNull()) {
+            project.setCustomer(new Customer(customerId));
+        }
+        Long projectManagerId = rs.getLong("project_manager_id");
+        if (!rs.wasNull()) {
+            project.setProjectManager(new ProjectManager(projectManagerId));
+        }
 
         return project;
     }

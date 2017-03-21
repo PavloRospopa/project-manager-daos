@@ -16,7 +16,7 @@ public class ConnectionManager {
     private static final String JDBC_USER = "jdbc.user";
     private static final String JDBC_PASSWORD = "jdbc.password";
 
-    private ConnectionManager() {
+    ConnectionManager() {
     }
 
     public static ConnectionManager getInstance() {
@@ -35,7 +35,8 @@ public class ConnectionManager {
             String url = PropertiesLoader.getInstance().getDbProperties().getProperty(JDBC_URL);
             connection = DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {
-            LOGGER.error("Cannot obtain connection to the database", e);
+            LOGGER.error(String.format("Cannot obtain connection to the database. " +
+                    "User: %s, password: %s", user, password), e);
         }
         return connection;
     }

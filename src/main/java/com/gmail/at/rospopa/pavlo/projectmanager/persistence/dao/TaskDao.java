@@ -8,16 +8,23 @@ public interface TaskDao extends Dao<Long, Task> {
     List<Task> findAllChildTasks(Long id);
     Task findParentTask(Long id);
 
-    List<Task> findBySprintId(Long id);
-    List<Task> findUnassignedTasksBySprintId(Long id);
-    List<Task> findActiveTasksBySprintId(Long id);
-    List<Task> findCompletedTasksBySprintId(Long id);
+    List<Task> findAllBySprintId(Long id);
+    List<Task> findTasksBySprintId(Long id, Task.Status status);
 
-    List<Task> findTasksByEmployeeId(Long id);
-    List<Task> findActiveTasksByEmployeeId(Long id);
-    List<Task> findCompletedTasksByEmployeeId(Long id);
+    List<Task> findAllByEmployeeId(Long id);
+    List<Task> findTasksByEmployeeId(Long id, Task.Status status);
 
-    void updateStatus(Long taskId, Task.Status status);
-    void updateEstimatedTime(Long taskId, int newEstimatedTime);
-    void updateSpentTime(Long taskId, int spentTime);
+    void updateStatus(Task.Status status, Long taskId);
+    void updateEstimatedTime(int newEstimatedTime, Long taskId);
+    void updateSpentTime(int spentTime, Long taskId);
+    void updateParentTask(Long parentTaskId, Long taskId);
+
+    List<Task> findDependantTasks(Long id);
+    List<Task> findDominatingTasks(Long id);
+
+    void addDependantTask(Long taskId, Long dependantTaskId);
+    void addDominatingTask(Long taskId, Long dominatingTaskId);
+
+    void removeDependantTask(Long taskId, Long dependantTaskId);
+    void removeDominatingTask(Long taskId, Long dominatingTaskId);
 }

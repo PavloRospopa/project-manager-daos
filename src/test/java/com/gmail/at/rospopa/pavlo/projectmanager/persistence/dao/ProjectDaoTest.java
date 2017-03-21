@@ -3,6 +3,7 @@ package com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao;
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.Customer;
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.Project;
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.ProjectManager;
+import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc.exception.RuntimeSqlException;
 import org.junit.Test;
 
 import java.sql.Date;
@@ -42,7 +43,7 @@ public abstract class ProjectDaoTest {
         assertEquals(expectedProject, actualProject);
     }
 
-    @Test
+    @Test(expected = RuntimeSqlException.class)
     public void deleteTest() {
         Long projectId = 3L;
 

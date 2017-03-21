@@ -3,9 +3,8 @@ package com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc;
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.Project;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.ProjectDao;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc.mapper.ProjectMapper;
+import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc.util.ConnectionManager;
 
-
-import java.sql.Connection;
 import java.util.List;
 
 public class JdbcProjectDao extends AbstractJdbcDao implements ProjectDao {
@@ -32,8 +31,8 @@ public class JdbcProjectDao extends AbstractJdbcDao implements ProjectDao {
     private static final String CUSTOMER = "attributes.customer";
     private static final String PROJECT_MANAGER = "attributes.projectManager";
 
-    public JdbcProjectDao(Connection connection) {
-        jdbcTemplate = new JdbcTemplate(connection);
+    public JdbcProjectDao(ConnectionManager connectionManager) {
+        jdbcTemplate = new JdbcTemplate(connectionManager);
     }
 
     @Override
@@ -49,33 +48,33 @@ public class JdbcProjectDao extends AbstractJdbcDao implements ProjectDao {
     @Override
     public void update(Project entity) {
         jdbcTemplate.executeUpdate(UPDATE_PARAMS_TEXT_SQL, entity.getName(), entity.getId(),
-                metamodelProp.getProperty(NAME));
+                METAMODEL_PROP.getProperty(NAME));
         jdbcTemplate.executeUpdate(UPDATE_PARAMS_DATE_SQL, entity.getStartDate(), entity.getId(),
-                metamodelProp.getProperty(START_DATE));
+                METAMODEL_PROP.getProperty(START_DATE));
         jdbcTemplate.executeUpdate(UPDATE_PARAMS_DATE_SQL, entity.getCompletionDate(), entity.getId(),
-                metamodelProp.getProperty(COMPLETION_DATE));
+                METAMODEL_PROP.getProperty(COMPLETION_DATE));
         jdbcTemplate.executeUpdate(UPDATE_PARAMS_DATE_SQL, entity.getExpectedCompletionDate(), entity.getId(),
-                metamodelProp.getProperty(EX_COMPLETION_DATE));
+                METAMODEL_PROP.getProperty(EX_COMPLETION_DATE));
         updateCustomer(entity.getCustomer().getId(), entity.getId());
         updateProjectManager(entity.getProjectManager().getId(), entity.getId());
     }
 
     @Override
     public Long add(Project entity) {
-        Long objectTypeId = Long.valueOf(metamodelProp.getProperty(OBJECT_TYPE));
+        Long objectTypeId = Long.valueOf(METAMODEL_PROP.getProperty(OBJECT_TYPE));
         Long id = jdbcTemplate.executeInsert(INSERT_INTO_OBJECTS_SQL, PK_COLUMN_NAME, objectTypeId);
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
-                metamodelProp.getProperty(NAME), entity.getName());
+                METAMODEL_PROP.getProperty(NAME), entity.getName());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_DATE_SQL, id,
-                metamodelProp.getProperty(START_DATE), entity.getStartDate());
+                METAMODEL_PROP.getProperty(START_DATE), entity.getStartDate());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_DATE_SQL, id,
-                metamodelProp.getProperty(COMPLETION_DATE), entity.getCompletionDate());
+                METAMODEL_PROP.getProperty(COMPLETION_DATE), entity.getCompletionDate());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_DATE_SQL, id,
-                metamodelProp.getProperty(EX_COMPLETION_DATE), entity.getExpectedCompletionDate());
+                METAMODEL_PROP.getProperty(EX_COMPLETION_DATE), entity.getExpectedCompletionDate());
         jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,
-                metamodelProp.getProperty(CUSTOMER), entity.getCustomer().getId());
+                METAMODEL_PROP.getProperty(CUSTOMER), entity.getCustomer().getId());
         jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,
-                metamodelProp.getProperty(PROJECT_MANAGER), entity.getProjectManager().getId());
+                METAMODEL_PROP.getProperty(PROJECT_MANAGER), entity.getProjectManager().getId());
 
         return id;
     }
@@ -103,12 +102,12 @@ public class JdbcProjectDao extends AbstractJdbcDao implements ProjectDao {
     @Override
     public void updateProjectManager(Long projectManagerId, Long projectId) {
         jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, projectManagerId, projectId,
-                metamodelProp.getProperty(PROJECT_MANAGER));
+                METAMODEL_PROP.getProperty(PROJECT_MANAGER));
     }
 
     @Override
     public void updateCustomer(Long customerId, Long projectId) {
         jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, customerId, projectId,
-                metamodelProp.getProperty(CUSTOMER));
+                METAMODEL_PROP.getProperty(CUSTOMER));
     }
 }

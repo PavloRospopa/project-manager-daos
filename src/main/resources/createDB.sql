@@ -180,12 +180,14 @@ SELECT
     taskTimeRequests.object_id as id, 
     newEstimatedTime.number_value as newEstimatedTime,
     status.text_value as status,
-    tasks.reference as task_id
+    tasks.reference as task_id,
+    employees.reference as employee_id
     from objects taskTimeRequests 
     join object_types on (taskTimeRequests.object_type_id = object_types.object_type_id AND object_types.name = 'TaskTimeRequest')
     join params newEstimatedTime on (taskTimeRequests.object_id = newEstimatedTime.object_id AND newEstimatedTime.attr_id = 18)                                                                                      
     join params status on (taskTimeRequests.object_id = status.object_id AND status.attr_id = 13)                                                                                        
-    join refs tasks on (taskTimeRequests.object_id = tasks.object_id AND tasks.attr_id = 14)                                                                                       
+    join refs tasks on (taskTimeRequests.object_id = tasks.object_id AND tasks.attr_id = 14)
+    join refs employees on (taskTimeRequests.object_id = employees.object_id AND employees.attr_id = 15)
 WITH READ ONLY;
 
 CREATE OR REPLACE VIEW users_view AS
