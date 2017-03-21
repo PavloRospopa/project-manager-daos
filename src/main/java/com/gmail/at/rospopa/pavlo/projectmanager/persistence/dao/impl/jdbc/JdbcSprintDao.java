@@ -58,8 +58,9 @@ public class JdbcSprintDao extends AbstractJdbcDao implements SprintDao {
                 METAMODEL_PROP.getProperty(EX_COMPLETION_DATE));
         jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, entity.getProject().getId(), entity.getId(),
                 METAMODEL_PROP.getProperty(PROJECT));
-        jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, entity.getPreviousSprint().getId(), entity.getId(),
-                METAMODEL_PROP.getProperty(PREVIOUS_SPRINT));
+
+        Long previousSprintId = entity.getPreviousSprint() != null ? entity.getPreviousSprint().getId() : null;
+        updatePreviousSprint(previousSprintId, entity.getId());
     }
 
     @Override
@@ -76,8 +77,12 @@ public class JdbcSprintDao extends AbstractJdbcDao implements SprintDao {
                 METAMODEL_PROP.getProperty(EX_COMPLETION_DATE), entity.getExpectedCompletionDate());
         jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,
                 METAMODEL_PROP.getProperty(PROJECT), entity.getProject().getId());
-        jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,
-                METAMODEL_PROP.getProperty(PREVIOUS_SPRINT), entity.getPreviousSprint().getId());
+
+        Sprint previousSprint = entity.getPreviousSprint();
+        if (previousSprint != null) {
+            jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,
+                    METAMODEL_PROP.getProperty(PREVIOUS_SPRINT), previousSprint.getId());
+        }
 
         return id;
     }
@@ -100,5 +105,19 @@ public class JdbcSprintDao extends AbstractJdbcDao implements SprintDao {
     @Override
     public List<Sprint> findCompletedSprintsByProjectId(Long id) {
         return jdbcTemplate.executeQuery(new SprintMapper(), FIND_COMPLETED_BY_PR_SQL, id);
+    }
+
+    private void updatePreviousSprint(Long previousSprintId, Long sprintId) {
+        if (previousSprintId == null) {
+            jdbcTemplate.executeUpdate(DELETE_REF_SQL, sprintId, METAMODEL_PROP.getProperty(PREVIOUS_SPRINT));
+            return;
+        }
+
+        int isUpdated = jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, previousSprintId, sprintId,
+                METAMODEL_PROP.getProperty(PREVIOUS_SPRINT));
+        if (isUpdated == 0) {
+            jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, sprintId,
+                    METAMODEL_PROP.getProperty(PREVIOUS_SPRINT), previousSprintId);
+        }
     }
 }

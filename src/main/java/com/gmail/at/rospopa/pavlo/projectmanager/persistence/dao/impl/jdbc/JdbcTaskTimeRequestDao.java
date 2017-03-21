@@ -56,6 +56,8 @@ public class JdbcTaskTimeRequestDao extends AbstractJdbcDao implements TaskTimeR
         updateStatus(entity.getId(), entity.getStatus());
         jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, entity.getTask().getId(), entity.getId(),
                 METAMODEL_PROP.getProperty(TASK));
+        jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, entity.getEmployee().getId(), entity.getId(),
+                METAMODEL_PROP.getProperty(EMPLOYEE));
     }
 
     @Override

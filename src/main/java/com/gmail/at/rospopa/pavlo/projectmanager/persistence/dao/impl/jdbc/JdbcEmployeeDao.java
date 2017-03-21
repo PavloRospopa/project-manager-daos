@@ -60,9 +60,9 @@ public class JdbcEmployeeDao extends AbstractUserJdbcDao<Employee> implements Em
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
                 METAMODEL_PROP.getProperty(EMAIL), entity.getEmail());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
-                METAMODEL_PROP.getProperty(ROLE), User.Role.EMPLOYEE);
+                METAMODEL_PROP.getProperty(ROLE), User.Role.EMPLOYEE.toString());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
-                METAMODEL_PROP.getProperty(POSITION), entity.getPosition());
+                METAMODEL_PROP.getProperty(POSITION), entity.getPosition().toString());
 
         return id;
     }
@@ -79,7 +79,7 @@ public class JdbcEmployeeDao extends AbstractUserJdbcDao<Employee> implements Em
 
     @Override
     public void updatePosition(Employee.Position position, Long employeeId) {
-        jdbcTemplate.executeUpdate(UPDATE_PARAMS_TEXT_SQL, position, employeeId,
+        jdbcTemplate.executeUpdate(UPDATE_PARAMS_TEXT_SQL, position.toString(), employeeId,
                 METAMODEL_PROP.getProperty(POSITION));
     }
 }

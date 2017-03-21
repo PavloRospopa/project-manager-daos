@@ -98,12 +98,14 @@ public class JdbcTaskDao extends AbstractJdbcDao implements TaskDao {
                 METAMODEL_PROP.getProperty(NAME), entity.getName());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_NUMBER_SQL, id,
                 METAMODEL_PROP.getProperty(ESTIMATED_TIME), entity.getEstimatedTime());
+        jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_NUMBER_SQL, id,
+                METAMODEL_PROP.getProperty(SPENT_TIME), entity.getSpentTime());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
-                METAMODEL_PROP.getProperty(REQUIRED_EMP_POS), entity.getRequiredEmpPosition());
+                METAMODEL_PROP.getProperty(REQUIRED_EMP_POS), entity.getRequiredEmpPosition().toString());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
                 METAMODEL_PROP.getProperty(DESCRIPTION), entity.getDescription());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
-                METAMODEL_PROP.getProperty(STATUS), Task.Status.UNASSIGNED);
+                METAMODEL_PROP.getProperty(STATUS), entity.getStatus().toString());
         Task parent = entity.getParent();
         if (parent != null) {
             jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,
@@ -171,6 +173,11 @@ public class JdbcTaskDao extends AbstractJdbcDao implements TaskDao {
 
     @Override
     public void updateParentTask(Long parentTaskId, Long taskId) {
+        if (parentTaskId == null) {
+            jdbcTemplate.executeUpdate(DELETE_REF_SQL, taskId, METAMODEL_PROP.getProperty(PARENT));
+            return;
+        }
+
         int isUpdated = jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, parentTaskId, taskId,
                 METAMODEL_PROP.getProperty(PARENT));
         if (isUpdated == 0) {

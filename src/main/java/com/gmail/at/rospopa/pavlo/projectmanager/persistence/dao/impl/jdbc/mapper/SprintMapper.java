@@ -9,7 +9,7 @@ import java.sql.SQLException;
 public class SprintMapper implements Mapper<Sprint> {
 
     @Override
-    public Sprint map(ResultSet rs) throws SQLException{
+    public Sprint map(ResultSet rs) throws SQLException {
         Sprint sprint = new Sprint();
 
         sprint.setId(rs.getLong("id"));

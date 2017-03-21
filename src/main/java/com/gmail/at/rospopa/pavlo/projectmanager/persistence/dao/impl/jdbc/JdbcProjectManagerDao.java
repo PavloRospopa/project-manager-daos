@@ -48,7 +48,7 @@ public class JdbcProjectManagerDao extends AbstractUserJdbcDao<ProjectManager> i
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
                 METAMODEL_PROP.getProperty(EMAIL), entity.getEmail());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
-                METAMODEL_PROP.getProperty(ROLE), User.Role.PROJECT_MANAGER);
+                METAMODEL_PROP.getProperty(ROLE), User.Role.PROJECT_MANAGER.toString());
 
         return id;
     }

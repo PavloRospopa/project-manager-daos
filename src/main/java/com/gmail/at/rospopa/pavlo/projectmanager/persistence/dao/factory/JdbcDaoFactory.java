@@ -1,7 +1,7 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.factory;
 
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.*;
-import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc.JdbcProjectDao;
+import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc.*;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc.util.ConnectionManager;
 
 public class JdbcDaoFactory implements DaoFactory {
@@ -14,17 +14,17 @@ public class JdbcDaoFactory implements DaoFactory {
 
     @Override
     public AdministratorDao getAdministratorDao() {
-       return null;
+        return new JdbcAdministratorDao(connectionManager);
     }
 
     @Override
     public CustomerDao getCustomerDao() {
-        return null;
+        return new JdbcCustomerDao(connectionManager);
     }
 
     @Override
     public EmployeeDao getEmployeeDao() {
-        return null;
+        return new JdbcEmployeeDao(connectionManager);
     }
 
     @Override
@@ -34,31 +34,31 @@ public class JdbcDaoFactory implements DaoFactory {
 
     @Override
     public ProjectManagerDao getProjectManagerDao() {
-        return null;
+        return new JdbcProjectManagerDao(connectionManager);
     }
 
     @Override
     public SprintDao getSprintDao() {
-        return null;
+        return new JdbcSprintDao(connectionManager);
     }
 
     @Override
     public TaskDao getTaskDao() {
-        return null;
+        return new JdbcTaskDao(connectionManager);
     }
 
     @Override
     public TaskDelegationDao getTaskDelegationDao() {
-        return null;
+        return new JdbcTaskDelegationDao(connectionManager);
     }
 
     @Override
     public TaskTimeRequestDao getTaskTimeRequestDao() {
-        return null;
+        return new JdbcTaskTimeRequestDao(connectionManager);
     }
 
     @Override
     public UserDao getUserDao() {
-        return null;
+        return new JdbcUserDao(connectionManager);
     }
 }

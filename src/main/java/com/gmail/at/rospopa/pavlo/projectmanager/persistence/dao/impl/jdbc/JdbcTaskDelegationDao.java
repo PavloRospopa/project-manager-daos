@@ -60,9 +60,12 @@ public class JdbcTaskDelegationDao extends AbstractJdbcDao implements TaskDelega
     public Long add(TaskDelegation entity) {
         Long objectTypeId = Long.valueOf(METAMODEL_PROP.getProperty(OBJECT_TYPE));
         Long id = jdbcTemplate.executeInsert(INSERT_INTO_OBJECTS_SQL, PK_COLUMN_NAME, objectTypeId);
-
+        jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_DATE_SQL, id,
+                METAMODEL_PROP.getProperty(START_DATE_TIME), entity.getStartDateTime());
+        jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_DATE_SQL, id,
+                METAMODEL_PROP.getProperty(COMPLETION_DATE_TIME), entity.getCompletionDateTime());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
-                METAMODEL_PROP.getProperty(STATUS), TaskDelegation.Status.UNCONFIRMED.toString());
+                METAMODEL_PROP.getProperty(STATUS), entity.getStatus().toString());
         jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,
                 METAMODEL_PROP.getProperty(TASK), entity.getTask().getId());
         jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,

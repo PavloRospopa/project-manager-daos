@@ -46,7 +46,7 @@ public class JdbcAdministratorDao extends AbstractUserJdbcDao<Administrator> imp
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
                 METAMODEL_PROP.getProperty(EMAIL), entity.getEmail());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
-                METAMODEL_PROP.getProperty(ROLE), User.Role.ADMINISTRATOR);
+                METAMODEL_PROP.getProperty(ROLE), User.Role.ADMINISTRATOR.toString());
 
         return id;
     }

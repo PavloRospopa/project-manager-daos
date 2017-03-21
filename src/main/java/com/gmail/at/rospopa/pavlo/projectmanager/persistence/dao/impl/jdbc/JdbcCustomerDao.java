@@ -61,7 +61,7 @@ public class JdbcCustomerDao extends AbstractUserJdbcDao<Customer> implements Cu
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
                 METAMODEL_PROP.getProperty(EMAIL), entity.getEmail());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
-                METAMODEL_PROP.getProperty(ROLE), User.Role.CUSTOMER);
+                METAMODEL_PROP.getProperty(ROLE), User.Role.CUSTOMER.toString());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_TEXT_SQL, id,
                 METAMODEL_PROP.getProperty(COMPANY), entity.getCompany());
 

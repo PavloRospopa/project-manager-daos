@@ -28,6 +28,7 @@ abstract class AbstractJdbcDao {
             "AND attr_id=?";
     protected static final String UPDATE_REFS_SQL = "UPDATE refs SET reference=? WHERE object_id=? " +
             "AND attr_id=?";
+    protected static final String DELETE_REF_SQL = "DELETE FROM refs WHERE object_id=? AND attr_id=?";
 
     protected static final String PK_COLUMN_NAME = "object_id";
 

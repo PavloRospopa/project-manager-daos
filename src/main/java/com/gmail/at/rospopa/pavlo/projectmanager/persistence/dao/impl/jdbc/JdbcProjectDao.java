@@ -1,6 +1,8 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc;
 
+import com.gmail.at.rospopa.pavlo.projectmanager.domain.Customer;
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.Project;
+import com.gmail.at.rospopa.pavlo.projectmanager.domain.ProjectManager;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.ProjectDao;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc.mapper.ProjectMapper;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc.util.ConnectionManager;
@@ -55,8 +57,12 @@ public class JdbcProjectDao extends AbstractJdbcDao implements ProjectDao {
                 METAMODEL_PROP.getProperty(COMPLETION_DATE));
         jdbcTemplate.executeUpdate(UPDATE_PARAMS_DATE_SQL, entity.getExpectedCompletionDate(), entity.getId(),
                 METAMODEL_PROP.getProperty(EX_COMPLETION_DATE));
-        updateCustomer(entity.getCustomer().getId(), entity.getId());
-        updateProjectManager(entity.getProjectManager().getId(), entity.getId());
+
+        Long customerId = entity.getCustomer() != null ? entity.getCustomer().getId() : null;
+        updateCustomer(customerId, entity.getId());
+
+        Long projectManagerId = entity.getProjectManager() != null ? entity.getProjectManager().getId() : null;
+        updateProjectManager(projectManagerId, entity.getId());
     }
 
     @Override
@@ -71,10 +77,18 @@ public class JdbcProjectDao extends AbstractJdbcDao implements ProjectDao {
                 METAMODEL_PROP.getProperty(COMPLETION_DATE), entity.getCompletionDate());
         jdbcTemplate.executeUpdate(INSERT_INTO_PARAMS_DATE_SQL, id,
                 METAMODEL_PROP.getProperty(EX_COMPLETION_DATE), entity.getExpectedCompletionDate());
-        jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,
-                METAMODEL_PROP.getProperty(CUSTOMER), entity.getCustomer().getId());
-        jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,
-                METAMODEL_PROP.getProperty(PROJECT_MANAGER), entity.getProjectManager().getId());
+
+        Customer customer = entity.getCustomer();
+        if (customer != null) {
+            jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,
+                    METAMODEL_PROP.getProperty(CUSTOMER), customer.getId());
+        }
+
+        ProjectManager projectManager = entity.getProjectManager();
+        if (projectManager != null) {
+            jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, id,
+                    METAMODEL_PROP.getProperty(PROJECT_MANAGER), projectManager.getId());
+        }
 
         return id;
     }
@@ -101,13 +115,31 @@ public class JdbcProjectDao extends AbstractJdbcDao implements ProjectDao {
 
     @Override
     public void updateProjectManager(Long projectManagerId, Long projectId) {
-        jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, projectManagerId, projectId,
+        if (projectManagerId == null) {
+            jdbcTemplate.executeUpdate(DELETE_REF_SQL, projectId, METAMODEL_PROP.getProperty(PROJECT_MANAGER));
+            return;
+        }
+
+        int isUpdated = jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, projectManagerId, projectId,
                 METAMODEL_PROP.getProperty(PROJECT_MANAGER));
+        if (isUpdated == 0) {
+            jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, projectId,
+                    METAMODEL_PROP.getProperty(PROJECT_MANAGER), projectManagerId);
+        }
     }
 
     @Override
     public void updateCustomer(Long customerId, Long projectId) {
-        jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, customerId, projectId,
+        if (customerId == null) {
+            jdbcTemplate.executeUpdate(DELETE_REF_SQL, projectId, METAMODEL_PROP.getProperty(CUSTOMER));
+            return;
+        }
+
+        int isUpdated = jdbcTemplate.executeUpdate(UPDATE_REFS_SQL, customerId, projectId,
                 METAMODEL_PROP.getProperty(CUSTOMER));
+        if (isUpdated == 0) {
+            jdbcTemplate.executeUpdate(INSERT_INTO_REFS_SQL, projectId,
+                    METAMODEL_PROP.getProperty(CUSTOMER), customerId);
+        }
     }
 }
