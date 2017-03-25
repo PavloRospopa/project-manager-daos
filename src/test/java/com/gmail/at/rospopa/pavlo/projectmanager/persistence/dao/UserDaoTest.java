@@ -1,8 +1,6 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao;
 
-import com.gmail.at.rospopa.pavlo.projectmanager.domain.Customer;
-import com.gmail.at.rospopa.pavlo.projectmanager.domain.Employee;
-import com.gmail.at.rospopa.pavlo.projectmanager.domain.User;
+import com.gmail.at.rospopa.pavlo.projectmanager.domain.*;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -31,4 +29,23 @@ public abstract class UserDaoTest {
         assertEquals(expectedCustomer, actualCustomer);
     }
 
+    @Test
+    public void findAdministratorByUsernamePassword() {
+        Administrator expectedAdministrator = new Administrator(19L, "Anton", "Pupkin", "admin", "admin111", "admin@mail.ru",
+                User.Role.ADMINISTRATOR);
+
+        User actualAdministrator = userDao.findByUsernamePassword("admin", "admin111");
+
+        assertEquals(expectedAdministrator, actualAdministrator);
+    }
+
+    @Test
+    public void findProjectManagerByUsernamePassword() {
+        ProjectManager expectedManager = new ProjectManager(2L, "Mike", "Dubovski", "prmanager", "pr1", "kot@mail.ru",
+                User.Role.PROJECT_MANAGER);
+
+        User actualManager = userDao.findByUsernamePassword("prmanager", "pr1");
+
+        assertEquals(expectedManager, actualManager);
+    }
 }

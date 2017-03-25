@@ -1,5 +1,7 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
+import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
+
 public class ProjectManager extends User {
     public ProjectManager() {
     }
@@ -23,5 +25,11 @@ public class ProjectManager extends User {
     @Override
     public int hashCode() {
         return super.hashCode();
+    }
+
+    @Override
+    public Prototype clone() {
+        return new ProjectManager(getId(), getName(), getSurname(), getUsername(), getPassword(),
+                getEmail(), getRole());
     }
 }

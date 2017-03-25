@@ -1,7 +1,8 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
+import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
+
 import java.sql.Date;
-import java.util.Objects;
 
 public class Project extends Entity {
     private String name;
@@ -118,5 +119,16 @@ public class Project extends Entity {
         result = 31 * result + (projectManager != null ? (projectManager.getId() != null ?
                 projectManager.getId().hashCode() : 0) : 0);
         return result;
+    }
+
+    @Override
+    public Prototype clone() {
+        Customer customer = getCustomer() != null ?
+                new Customer(getCustomer().getId()) : null;
+        ProjectManager projectManager = getProjectManager() != null ?
+                new ProjectManager(getProjectManager().getId()) : null;
+
+        return new Project(getId(), getName(), getStartDate(), getCompletionDate(),
+                getExpectedCompletionDate(), customer, projectManager);
     }
 }

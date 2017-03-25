@@ -1,5 +1,7 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
+import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
+
 public class Administrator extends User {
     public Administrator() {
     }
@@ -23,5 +25,11 @@ public class Administrator extends User {
     @Override
     public int hashCode() {
         return super.hashCode();
+    }
+
+    @Override
+    public Prototype clone() {
+        return new Administrator(getId(), getName(), getSurname(), getUsername(), getPassword(),
+                getEmail(), getRole());
     }
 }

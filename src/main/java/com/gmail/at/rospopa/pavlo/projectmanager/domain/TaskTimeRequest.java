@@ -1,5 +1,7 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
+import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
+
 public class TaskTimeRequest extends Entity {
     private Task task;
     private Employee employee;
@@ -81,5 +83,15 @@ public class TaskTimeRequest extends Entity {
         result = 31 * result + newEstimatedTime;
         result = 31 * result + (status != null ? status.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public Prototype clone() {
+        Task task = getTask() != null ?
+                new Task(getTask().getId()) : null;
+        Employee employee = getEmployee() != null ?
+                new Employee(getEmployee().getId()) : null;
+
+        return new TaskTimeRequest(getId(), task, employee, getNewEstimatedTime(), getStatus());
     }
 }

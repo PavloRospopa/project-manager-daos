@@ -1,5 +1,7 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
+import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
+
 import java.sql.Timestamp;
 
 public class TaskDelegation extends Entity{
@@ -98,5 +100,15 @@ public class TaskDelegation extends Entity{
         result = 31 * result + (completionDateTime != null ? completionDateTime.hashCode() : 0);
         result = 31 * result + (status != null ? status.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public Prototype clone() {
+        Task task = getTask() != null ?
+                new Task(getTask().getId()) : null;
+        Employee employee = getEmployee() != null ?
+                new Employee(getEmployee().getId()) : null;
+
+        return new TaskDelegation(getId(), task, employee, getStartDateTime(), getCompletionDateTime(), getStatus());
     }
 }

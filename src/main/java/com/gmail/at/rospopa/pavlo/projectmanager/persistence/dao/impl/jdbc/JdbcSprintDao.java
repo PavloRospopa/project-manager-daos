@@ -19,7 +19,7 @@ public class JdbcSprintDao extends AbstractJdbcDao implements SprintDao {
             "JOIN tasks_view t ON s.id = t.sprint_id AND t.id =?";
     private static final String FIND_ACTIVE_BY_PR_SQL = "SELECT id, name, startDate, completionDate, " +
             "expectedCompletionDate, project_id, previousSprint_id FROM sprints_view " +
-            "WHERE project_id =? AND CURRENT_DATE >= startDate AND completionDate IS NULL";
+            "WHERE project_id =? AND SYSDATE >= startDate AND completionDate IS NULL";
     private static final String FIND_COMPLETED_BY_PR_SQL = "SELECT id, name, startDate, completionDate, " +
             "expectedCompletionDate, project_id, previousSprint_id FROM sprints_view " +
             "WHERE project_id =? AND completionDate IS NOT NULL";

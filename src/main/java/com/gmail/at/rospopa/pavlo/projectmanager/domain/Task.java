@@ -1,5 +1,7 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
+import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -150,5 +152,16 @@ public class Task extends Entity {
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (status != null ? status.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public Prototype clone() {
+        Task parentTask = getParent() != null ?
+                new Task(getParent().getId()) : null;
+        Sprint sprint = getSprint() != null ?
+                new Sprint(getSprint().getId()) : null;
+
+        return new Task(getId(), getEstimatedTime(), getSpentTime(), parentTask, sprint, getRequiredEmpPosition(),
+                getName(), getDescription(), getStatus());
     }
 }

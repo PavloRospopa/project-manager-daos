@@ -1,7 +1,12 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
-public abstract class Entity {
+import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
+
+public abstract class Entity implements Prototype {
     private Long id;
+
+    @Override
+    public abstract Prototype clone();
 
     public Entity() {
     }

@@ -23,7 +23,8 @@ public class JdbcProjectDao extends AbstractJdbcDao implements ProjectDao {
             "expectedCompletionDate, customer_id, project_manager_id FROM projects_view " +
             "WHERE id=(SELECT project_id FROM sprints_view WHERE id=?)";
     private static final String FIND_ACTIVE_PROJECTS_SQL = "SELECT id, name, startDate, completionDate, " +
-            "expectedCompletionDate, customer_id, project_manager_id FROM projects_view WHERE completionDate IS NULL";
+            "expectedCompletionDate, customer_id, project_manager_id FROM projects_view WHERE SYSDATE >= startDate AND " +
+            "completionDate IS NULL";
 
     private static final String OBJECT_TYPE = "object_types.project";
     private static final String NAME = "attributes.name";

@@ -1,5 +1,7 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
+import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
+
 public class Customer extends User {
     String company;
 
@@ -51,5 +53,11 @@ public class Customer extends User {
         int result = super.hashCode();
         result = 31 * result + (company != null ? company.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public Prototype clone() {
+        return new Customer(getId(), getName(), getSurname(), getUsername(), getPassword(),
+                getEmail(), getRole(), getCompany());
     }
 }

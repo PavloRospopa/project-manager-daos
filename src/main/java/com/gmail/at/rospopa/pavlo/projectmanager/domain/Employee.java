@@ -1,5 +1,7 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
+import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
+
 import java.util.List;
 
 public class Employee extends User {
@@ -66,5 +68,11 @@ public class Employee extends User {
         int result = super.hashCode();
         result = 31 * result + (position != null ? position.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public Prototype clone() {
+        return new Employee(getId(), getName(), getSurname(), getUsername(), getPassword(),
+                getEmail(), getRole(), getPosition());
     }
 }

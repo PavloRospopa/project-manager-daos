@@ -1,5 +1,7 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
+import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
+
 import java.sql.Date;
 
 public class Sprint extends Entity {
@@ -116,5 +118,16 @@ public class Sprint extends Entity {
         result = 31 * result + (previousSprint != null ? (previousSprint.getId() != null ? previousSprint.getId().hashCode() : 0) : 0);
         result = 31 * result + (project != null ? (project.getId() != null ? project.getId().hashCode() : 0) : 0);
         return result;
+    }
+
+    @Override
+    public Prototype clone() {
+        Sprint previousSprint = getPreviousSprint() != null ?
+                new Sprint(getPreviousSprint().getId()) : null;
+        Project project = getProject() != null ?
+                new Project(getProject().getId()) : null;
+
+        return new Sprint(getId(), getName(), getStartDate(), getCompletionDate(), getExpectedCompletionDate(),
+                previousSprint, project);
     }
 }
