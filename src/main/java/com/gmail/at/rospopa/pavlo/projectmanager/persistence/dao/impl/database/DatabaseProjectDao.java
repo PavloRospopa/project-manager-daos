@@ -46,20 +46,25 @@ public class DatabaseProjectDao extends AbstractDatabaseDao implements ProjectDa
 
     @Override
     public List<Project> findByCustomerId(Long id) {
-        return selectFrom(PROJECTS_TABLE, p -> p.getCustomer().getId().equals(id));
+        return selectFrom(PROJECTS_TABLE,
+                p -> p.getCustomer() != null && p.getCustomer().getId().equals(id));
     }
 
     @Override
     public List<Project> findByProjectManagerId(Long id) {
-        return selectFrom(PROJECTS_TABLE, p -> p.getProjectManager().getId().equals(id));
+        return selectFrom(PROJECTS_TABLE,
+                p -> p.getProjectManager() != null && p.getProjectManager().getId().equals(id));
     }
 
     @Override
     public Project findBySprintId(Long id) {
         Sprint sprint = database.selectFrom(SPRINTS_TABLE, id);
-        Long projectId = sprint.getProject().getId();
+        if (sprint != null) {
+            Long projectId = sprint.getProject().getId();
 
-        return database.selectFrom(PROJECTS_TABLE, projectId);
+            return database.selectFrom(PROJECTS_TABLE, projectId);
+        }
+        return null;
     }
 
     @Override
@@ -67,8 +72,9 @@ public class DatabaseProjectDao extends AbstractDatabaseDao implements ProjectDa
         Date currentDate = new Date(new java.util.Date().getTime());
 
         return selectFrom(PROJECTS_TABLE,
-                p -> p.getStartDate().compareTo(currentDate) < 0 &&
-                        p.getCompletionDate() == null);
+                p -> p.getStartDate() != null
+                        && p.getStartDate().compareTo(currentDate) < 0
+                        && p.getCompletionDate() == null);
     }
 
     @Override
