@@ -83,8 +83,7 @@ public class Sprint extends Entity {
         return "Sprint{" +
                 "id=" + getId() +
                 ", name='" + name + '\'' +
-                ", previous sprint='" + previousSprint.getName() + '\'' +
-                ", project='" + project.getName() + '\'' +
+                ", project id='" + project.getId() + '\'' +
                 '}';
     }
 

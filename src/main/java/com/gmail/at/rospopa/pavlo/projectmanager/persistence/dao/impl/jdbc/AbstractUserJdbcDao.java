@@ -2,7 +2,7 @@ package com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.jdbc;
 
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.User;
 
-class AbstractUserJdbcDao<T extends User> extends AbstractJdbcDao {
+abstract class AbstractUserJdbcDao<T extends User> extends AbstractJdbcDao {
     protected static final String NAME = "attributes.name";
     protected static final String SURNAME = "attributes.surname";
     protected static final String USERNAME = "attributes.username";

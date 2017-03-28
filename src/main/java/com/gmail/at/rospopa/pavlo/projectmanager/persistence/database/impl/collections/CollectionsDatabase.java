@@ -157,13 +157,7 @@ public class CollectionsDatabase implements Database {
     }
 
     private <T> CollectionsTable<T> getTable(String tableName) {
-        try {
-            return (CollectionsTable<T>) tables.get(tableName);
-        } catch (ClassCastException e) {
-            LOGGER.error(String.format("Table %s holds objects of other type than specified by parameter <T>",
-                    tableName), e);
-            throw new InvalidParameterTypeException();
-        }
+        return (CollectionsTable<T>) tables.get(tableName);
     }
 
     private void checkInitialization() {

@@ -1,12 +1,13 @@
-package com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.collections;
+package com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.json;
 
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.*;
 import com.gmail.at.rospopa.pavlo.projectmanager.util.PrototypePair;
 
+import java.nio.file.Path;
 import java.sql.Date;
 import java.sql.Timestamp;
 
-public class PMCollectionsDatabase extends CollectionsDatabase {
+public class PMJsonDatabase extends JsonDatabase {
 
     private static final String PROJECTS_TABLE = "PROJECTS";
     private static final String SPRINTS_TABLE = "SPRINTS";
@@ -19,6 +20,14 @@ public class PMCollectionsDatabase extends CollectionsDatabase {
     private static final String PROJECT_MANAGERS_TABLE = "PROJECT_MANAGERS";
     private static final String TASK_DEPENDENCIES_TABLE = "TASK_DEPENDENCIES";
 
+    public PMJsonDatabase(Path rootDirectoryPath, boolean rewriteOldData) {
+        super(rootDirectoryPath, rewriteOldData);
+    }
+
+    public PMJsonDatabase(Path rootDirectoryPath) {
+        super(rootDirectoryPath);
+    }
+
     @Override
     public void initDatabase() {
         super.initDatabase();
@@ -29,15 +38,18 @@ public class PMCollectionsDatabase extends CollectionsDatabase {
         createTable(TASK_DELEGATIONS_TABLE, TaskDelegation.class);
         createTable(TASK_TIME_REQUESTS_TABLE, TaskTimeRequest.class);
         createTable(ADMINISTRATORS_TABLE, Administrator.class);
-        createTable(CUSTOMERS_TABLE, Customer.class);
         createTable(EMPLOYEES_TABLE, Employee.class);
+        createTable(CUSTOMERS_TABLE, Customer.class);
         createTable(PROJECT_MANAGERS_TABLE, ProjectManager.class);
         createTable(TASK_DEPENDENCIES_TABLE, PrototypePair.class);
     }
 
-    public void refreshDatabase() {
-        getTableNames().forEach(this::clearTable);
 
+    public void clearDatabase() {
+        getTableNames().forEach(this::clearTable);
+    }
+
+    public void fillDatabase() {
         addProjects();
         addSprints();
         addTasks();

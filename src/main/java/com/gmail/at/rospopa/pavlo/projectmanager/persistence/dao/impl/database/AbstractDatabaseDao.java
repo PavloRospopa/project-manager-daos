@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-class AbstractDatabaseDao {
+abstract class AbstractDatabaseDao {
 
     protected Database database;
 

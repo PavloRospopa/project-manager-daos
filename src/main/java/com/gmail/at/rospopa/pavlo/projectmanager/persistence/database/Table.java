@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 
 public interface Table<K, V> {
 
-    V put(K key, V value);
+    void put(K key, V value);
     boolean remove(K key);
     boolean replace(K key, V value);
     Map<K, V> selectAll();
@@ -14,4 +14,5 @@ public interface Table<K, V> {
     void clear();
     K getNextId();
     K getAndGenerateNextId();
+    Class<V> getObjectsType();
 }

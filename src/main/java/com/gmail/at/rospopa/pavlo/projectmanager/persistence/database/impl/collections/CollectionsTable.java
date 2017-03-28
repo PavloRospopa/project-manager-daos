@@ -18,6 +18,7 @@ public class CollectionsTable<T> implements Table<Long, T> {
         objectsMap = new HashMap<>();
     }
 
+    @Override
     public Class<T> getObjectsType() {
         return objectsType;
     }
@@ -33,8 +34,8 @@ public class CollectionsTable<T> implements Table<Long, T> {
     }
 
     @Override
-    public T put(Long key, T value) {
-        return objectsMap.put(key, value);
+    public void put(Long key, T value) {
+        objectsMap.put(key, value);
     }
 
     @Override

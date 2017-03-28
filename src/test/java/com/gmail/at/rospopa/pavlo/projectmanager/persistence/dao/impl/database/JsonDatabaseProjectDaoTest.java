@@ -4,20 +4,26 @@ import com.gmail.at.rospopa.pavlo.projectmanager.domain.Customer;
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.Project;
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.ProjectManager;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.ProjectDaoTest;
-import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.collections.PMCollectionsDatabase;
+import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.json.PMJsonDatabase;
+import com.gmail.at.rospopa.pavlo.projectmanager.util.PropertiesLoader;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.nio.file.Paths;
 import java.sql.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class DatabaseProjectDaoTest extends ProjectDaoTest {
-    private PMCollectionsDatabase database;
+public class JsonDatabaseProjectDaoTest extends ProjectDaoTest {
+    private static final String rootDirectoryPath = PropertiesLoader.getInstance()
+            .getJsonDBProperties().getProperty("json.database.test.rootDirectoryPath");
 
-    public DatabaseProjectDaoTest() {
-        database = new PMCollectionsDatabase();
+    private PMJsonDatabase database;
+
+    public JsonDatabaseProjectDaoTest() {
+        database = new PMJsonDatabase(Paths.get(rootDirectoryPath), true);
         database.initDatabase();
 
         projectDao = new DatabaseProjectDao(database);
@@ -25,9 +31,13 @@ public class DatabaseProjectDaoTest extends ProjectDaoTest {
 
     @Before
     public void setUp() throws Exception {
-        database.refreshDatabase();
+        database.fillDatabase();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        database.clearDatabase();
+    }
 
     @Test
     @Override
