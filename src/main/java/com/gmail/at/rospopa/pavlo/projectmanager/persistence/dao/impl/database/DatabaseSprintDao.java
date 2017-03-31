@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DatabaseSprintDao extends AbstractDatabaseDao implements SprintDao {
     private static final String SPRINTS_TABLE = "SPRINTS";
-    private static final String TASKS_TABLE = "TABLES";
+    private static final String TASKS_TABLE = "TASKS";
 
     public DatabaseSprintDao(Database database) {
         super(database);

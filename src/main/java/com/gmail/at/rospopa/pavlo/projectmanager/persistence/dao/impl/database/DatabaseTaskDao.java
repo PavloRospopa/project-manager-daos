@@ -4,7 +4,8 @@ import com.gmail.at.rospopa.pavlo.projectmanager.domain.Task;
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.TaskDelegation;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.TaskDao;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.Database;
-import com.gmail.at.rospopa.pavlo.projectmanager.util.PrototypePair;
+import com.gmail.at.rospopa.pavlo.projectmanager.domain.DependenciesPair;
+import com.gmail.at.rospopa.pavlo.projectmanager.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DatabaseTaskDao extends AbstractDatabaseDao implements TaskDao {
-    private static final String TASKS_TABLE = "TABLES";
+    private static final String TASKS_TABLE = "TASKS";
     private static final String TASK_DELEGATIONS_TABLE = "TASK_DELEGATIONS";
     private static final String TASK_DEPENDENCIES_TABLE = "TASK_DEPENDENCIES";
 
@@ -132,10 +133,10 @@ public class DatabaseTaskDao extends AbstractDatabaseDao implements TaskDao {
 
     @Override
     public List<Task> findDependantTasks(Long id) {
-        List<PrototypePair<Task, Task>> dependenciesList = selectFrom(TASK_DEPENDENCIES_TABLE,
-                (PrototypePair<Task, Task> pair) -> pair.getLeft().getId().equals(id));
+        List<DependenciesPair> dependenciesList = selectFrom(TASK_DEPENDENCIES_TABLE,
+                (DependenciesPair pair) -> pair.getLeft().equals(id));
         Set<Long> taskIdSet = dependenciesList.stream()
-                .map((PrototypePair<Task, Task> pair) -> pair.getRight().getId())
+                .map(Pair::getRight)
                 .collect(Collectors.toSet());
 
         List<Task> taskList = new ArrayList<>();
@@ -145,10 +146,10 @@ public class DatabaseTaskDao extends AbstractDatabaseDao implements TaskDao {
 
     @Override
     public List<Task> findDominatingTasks(Long id) {
-        List<PrototypePair<Task, Task>> dependenciesList = selectFrom(TASK_DEPENDENCIES_TABLE,
-                (PrototypePair<Task, Task> pair) -> pair.getRight().getId().equals(id));
+        List<DependenciesPair> dependenciesList = selectFrom(TASK_DEPENDENCIES_TABLE,
+                (DependenciesPair pair) -> pair.getRight().equals(id));
         Set<Long> taskIdSet = dependenciesList.stream()
-                .map((PrototypePair<Task, Task> pair) -> pair.getLeft().getId())
+                .map(Pair::getLeft)
                 .collect(Collectors.toSet());
 
         List<Task> taskList = new ArrayList<>();
@@ -158,18 +159,14 @@ public class DatabaseTaskDao extends AbstractDatabaseDao implements TaskDao {
 
     @Override
     public void addDependantTask(Long taskId, Long dependantTaskId) {
-        Task task = new Task(taskId);
-        Task dependantTask = new Task(dependantTaskId);
-        PrototypePair<Task, Task> dependency = new PrototypePair<>(task, dependantTask);
+        DependenciesPair dependency = new DependenciesPair(taskId, dependantTaskId);
 
         database.add(TASK_DEPENDENCIES_TABLE, dependency);
     }
 
     @Override
     public void addDominatingTask(Long taskId, Long dominatingTaskId) {
-        Task task = new Task(taskId);
-        Task dominatingTask = new Task(dominatingTaskId);
-        PrototypePair<Task, Task> dependency = new PrototypePair<>(dominatingTask, task);
+        DependenciesPair dependency = new DependenciesPair(dominatingTaskId, taskId);
 
         database.add(TASK_DEPENDENCIES_TABLE, dependency);
     }
@@ -177,8 +174,8 @@ public class DatabaseTaskDao extends AbstractDatabaseDao implements TaskDao {
     @Override
     public void removeDependantTask(Long taskId, Long dependantTaskId) {
         Long dependencyId = database.selectFrom(TASK_DELEGATIONS_TABLE,
-                (PrototypePair<Task, Task> pair) -> pair.getLeft().getId().equals(taskId) &&
-                        pair.getRight().getId().equals(dependantTaskId))
+                (DependenciesPair pair) -> pair.getLeft().equals(taskId) &&
+                        pair.getRight().equals(dependantTaskId))
                 .keySet().iterator().next();
 
         database.deleteFrom(TASK_DEPENDENCIES_TABLE, dependencyId);
@@ -187,8 +184,8 @@ public class DatabaseTaskDao extends AbstractDatabaseDao implements TaskDao {
     @Override
     public void removeDominatingTask(Long taskId, Long dominatingTaskId) {
         Long dependencyId = database.selectFrom(TASK_DELEGATIONS_TABLE,
-                (PrototypePair<Task, Task> pair) -> pair.getLeft().getId().equals(dominatingTaskId) &&
-                        pair.getRight().getId().equals(taskId))
+                (DependenciesPair pair) -> pair.getLeft().equals(dominatingTaskId) &&
+                        pair.getRight().equals(taskId))
                 .keySet().iterator().next();
 
         database.deleteFrom(TASK_DEPENDENCIES_TABLE, dependencyId);

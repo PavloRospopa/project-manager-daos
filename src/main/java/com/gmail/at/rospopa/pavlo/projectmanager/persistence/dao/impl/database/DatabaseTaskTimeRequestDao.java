@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class DatabaseTaskTimeRequestDao extends AbstractDatabaseDao implements TaskTimeRequestDao {
     private static final String TASK_TIME_REQUESTS_TABLE = "TASK_TIME_REQUESTS";
     private static final String SPRINTS_TABLE = "SPRINTS";
-    private static final String TASKS_TABLE = "TABLES";
+    private static final String TASKS_TABLE = "TASKS";
 
     public DatabaseTaskTimeRequestDao(Database database) {
         super(database);

@@ -1,7 +1,7 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.collections;
 
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.*;
-import com.gmail.at.rospopa.pavlo.projectmanager.util.PrototypePair;
+import com.gmail.at.rospopa.pavlo.projectmanager.domain.DependenciesPair;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -32,7 +32,7 @@ public class PMCollectionsDatabase extends CollectionsDatabase {
         createTable(CUSTOMERS_TABLE, Customer.class);
         createTable(EMPLOYEES_TABLE, Employee.class);
         createTable(PROJECT_MANAGERS_TABLE, ProjectManager.class);
-        createTable(TASK_DEPENDENCIES_TABLE, PrototypePair.class);
+        createTable(TASK_DEPENDENCIES_TABLE, DependenciesPair.class);
     }
 
     public void refreshDatabase() {

@@ -17,7 +17,7 @@ public class DatabaseEmployeeDao extends AbstractDatabaseDao implements Employee
     private static final String EMPLOYEES_TABLE = "EMPLOYEES";
     private static final String TASK_DELEGATIONS_TABLE = "TASK_DELEGATIONS";
     private static final String SPRINTS_TABLE = "SPRINTS";
-    private static final String TASKS_TABLE = "TABLES";
+    private static final String TASKS_TABLE = "TASKS";
 
     public DatabaseEmployeeDao(Database database) {
         super(database);

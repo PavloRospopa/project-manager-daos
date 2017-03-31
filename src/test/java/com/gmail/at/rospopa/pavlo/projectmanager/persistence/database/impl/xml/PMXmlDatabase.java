@@ -1,14 +1,12 @@
-package com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.json;
+package com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.xml;
 
 import com.gmail.at.rospopa.pavlo.projectmanager.domain.*;
-import com.gmail.at.rospopa.pavlo.projectmanager.domain.DependenciesPair;
 
 import java.nio.file.Path;
 import java.sql.Date;
 import java.sql.Timestamp;
 
-public class PMJsonDatabase extends JsonDatabase {
-
+public class PMXmlDatabase extends XmlDatabase {
     private static final String PROJECTS_TABLE = "PROJECTS";
     private static final String SPRINTS_TABLE = "SPRINTS";
     private static final String TASKS_TABLE = "TASKS";
@@ -20,11 +18,11 @@ public class PMJsonDatabase extends JsonDatabase {
     private static final String PROJECT_MANAGERS_TABLE = "PROJECT_MANAGERS";
     private static final String TASK_DEPENDENCIES_TABLE = "TASK_DEPENDENCIES";
 
-    public PMJsonDatabase(Path rootDirectoryPath, boolean rewriteOldData) {
+    public PMXmlDatabase(Path rootDirectoryPath, boolean rewriteOldData) {
         super(rootDirectoryPath, rewriteOldData);
     }
 
-    public PMJsonDatabase(Path rootDirectoryPath) {
+    public PMXmlDatabase(Path rootDirectoryPath) {
         super(rootDirectoryPath);
     }
 
@@ -59,6 +57,7 @@ public class PMJsonDatabase extends JsonDatabase {
         addCustomers();
         addProjectManagers();
         addEmployees();
+        addDependencies();
     }
 
     private void addProjects() {
@@ -145,5 +144,11 @@ public class PMJsonDatabase extends JsonDatabase {
                 User.Role.EMPLOYEE, Employee.Position.MIDDLE));
         insert(EMPLOYEES_TABLE, 11L, new Employee(11L, "Robert", "Kolezki", "kolezki", "111", "kolezki@gmail.com",
                 User.Role.EMPLOYEE, Employee.Position.JUNIOR));
+    }
+
+    private void addDependencies() {
+        insert(TASK_DEPENDENCIES_TABLE, 1L, new DependenciesPair(7L, 9L));
+        insert(TASK_DEPENDENCIES_TABLE, 2L, new DependenciesPair(8L, 9L));
+        insert(TASK_DEPENDENCIES_TABLE, 3L, new DependenciesPair(22L, 23L));
     }
 }
