@@ -1,7 +1,6 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.persistence.dao.impl.database;
 
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.Database;
-import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
 
 import java.util.List;
 import java.util.Map;
@@ -16,13 +15,13 @@ abstract class AbstractDatabaseDao {
         this.database = database;
     }
 
-    protected <T extends Prototype> List<T> selectFrom(String tableName, Predicate<T> filter) {
+    protected <T> List<T> selectFrom(String tableName, Predicate<T> filter) {
         Map<Long, T> entityMap = database.selectFrom(tableName, filter);
 
         return entityMap.values().stream().collect(Collectors.toList());
     }
 
-    protected <T extends Prototype> List<T> selectFrom(String tableName) {
+    protected <T> List<T> selectFrom(String tableName) {
         Map<Long, T> entityMap = database.selectFrom(tableName);
 
         return entityMap.values().stream().collect(Collectors.toList());

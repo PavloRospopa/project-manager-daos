@@ -31,4 +31,15 @@ public class FileUtils {
             }
         });
     }
+
+    public static void deleteFileTreeHard(Path rootPath) throws IOException {
+        while (true) {
+            try {
+                deleteFileTree(rootPath);
+                return;
+            } catch (IOException e) {
+
+            }
+        }
+    }
 }

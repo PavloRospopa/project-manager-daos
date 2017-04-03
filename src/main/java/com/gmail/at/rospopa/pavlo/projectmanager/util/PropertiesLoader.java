@@ -17,17 +17,20 @@ public class PropertiesLoader {
     private static final String METAMODEL_PROPERTIES = "metamodel.properties";
     private static final String JSON_DB_PROPERTIES = "jsonDatabase.properties";
     private static final String XML_DB_PROPERTIES = "xmlDatabase.properties";
+    private static final String BIN_DB_PROPERTIES = "binDatabase.properties";
 
     private Properties dbProperties;
     private Properties metamodelProperties;
     private Properties jsonDBProperties;
     private Properties xmlDBProperties;
+    private Properties binDBProperties;
 
     private PropertiesLoader() {
         dbProperties = loadProperties(ResourcesUtil.getResourceInputStream(DB_PROPERTIES));
         metamodelProperties = loadProperties(ResourcesUtil.getResourceInputStream(METAMODEL_PROPERTIES));
         jsonDBProperties = loadProperties(ResourcesUtil.getResourceInputStream(JSON_DB_PROPERTIES));
         xmlDBProperties = loadProperties(ResourcesUtil.getResourceInputStream(XML_DB_PROPERTIES));
+        binDBProperties = loadProperties(ResourcesUtil.getResourceInputStream(BIN_DB_PROPERTIES));
     }
 
     public static PropertiesLoader getInstance() {
@@ -48,6 +51,10 @@ public class PropertiesLoader {
 
     public Properties getXmlDBProperties() {
         return xmlDBProperties;
+    }
+
+    public Properties getBinDBProperties() {
+        return binDBProperties;
     }
 
     private Properties loadProperties(InputStream is) {

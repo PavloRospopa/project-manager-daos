@@ -1,6 +1,6 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.collections;
 
-import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.Table;
+import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.AbstractTable;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,29 +8,18 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class CollectionsTable<T> implements Table<Long, T> {
+public class CollectionsTable<T> extends AbstractTable<T> {
     private Map<Long, T> objectsMap;
-    private Class<T> objectsType;
-    private Long nextId = 1L;
 
     public CollectionsTable(Class<T> objectsType) {
         this.objectsType = objectsType;
         objectsMap = new HashMap<>();
-    }
-
-    @Override
-    public Class<T> getObjectsType() {
-        return objectsType;
+        nextId = 1L;
     }
 
     @Override
     public Long getAndGenerateNextId() {
         return nextId++;
-    }
-
-    @Override
-    public Long getNextId() {
-        return nextId;
     }
 
     @Override

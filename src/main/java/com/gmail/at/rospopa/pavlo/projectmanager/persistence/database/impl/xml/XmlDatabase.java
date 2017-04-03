@@ -10,12 +10,10 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.Database;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.exception.*;
-import com.gmail.at.rospopa.pavlo.projectmanager.util.FileUtils;
+import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.AbstractFileDatabase;
 import com.gmail.at.rospopa.pavlo.projectmanager.util.Pair;
 import com.gmail.at.rospopa.pavlo.projectmanager.util.PropertiesLoader;
-import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,10 +25,8 @@ import java.nio.file.StandardOpenOption;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-public class XmlDatabase implements Database {
+public class XmlDatabase extends AbstractFileDatabase {
     private static final Logger LOGGER = LogManager.getLogger();
     private static Properties XML_DB_PROP = PropertiesLoader.getInstance().getXmlDBProperties();
 
@@ -38,16 +34,8 @@ public class XmlDatabase implements Database {
     private static final String TABLES_DIR = XML_DB_PROP.getProperty("xml.database.tables.dir");
     private static final String METADATA_FILE_NAME = XML_DB_PROP.getProperty("xml.database.metadata.file");
 
-    private Path rootDir;
-    private Path metadataFile;
-    private Path tablesDir;
-
     private JavaType tablePropertiesPairType;
     private XmlMapper mapper;
-
-    private Map<String, XmlTable<?>> tables;
-    private boolean databaseInitialized;
-    private boolean rewriteOldData;
 
     public XmlDatabase(Path rootDirectoryPath, boolean rewriteOldData) {
         rootDir = rootDirectoryPath.resolve(ROOT_DIR);
@@ -63,39 +51,14 @@ public class XmlDatabase implements Database {
     }
 
     @Override
-    public void initDatabase() {
-        tables = new HashMap<>();
-
-        if (!rewriteOldData) {
-            checkDatabaseDirectoryStructure();
-            createTablesFromMetadataFile();
-        } else {
-            cleanDatabaseDirectories();
-            createDatabaseStructure();
-        }
-        databaseInitialized = true;
-    }
-
-    @Override
-    public boolean isInitialized() {
-        return databaseInitialized;
-    }
-
-    @Override
-    public Set<String> getTableNames() {
-        checkInitialization();
-        return tables.keySet().stream().collect(Collectors.toSet());
-    }
-
-    @Override
-    public void createTable(String tableName, Class<? extends Prototype> objectsType) {
+    public void createTable(String tableName, Class<?> objectsType) {
         checkInitialization();
         checkTableAbsence(tableName);
 
         XmlTable<?> xmlTable = new XmlTable<>(objectsType, tableName, tablesDir, mapper);
-        xmlTable.initXmlTable(true);
+        xmlTable.initTable(true);
         tables.put(tableName, xmlTable);
-        updateMetadataFile(tableName, objectsType);
+        registerTable(tableName, objectsType);
     }
 
     @Override
@@ -122,100 +85,11 @@ public class XmlDatabase implements Database {
     }
 
     @Override
-    public void clearTable(String tableName) {
-        checkInitialization();
-        checkTablePresence(tableName);
-        tables.get(tableName).clear();
+    protected Logger getLogger() {
+        return LOGGER;
     }
 
-    @Override
-    public boolean tableExists(String tableName) {
-        return tables.containsKey(tableName);
-    }
-
-    @Override
-    public Long getNextId(String tableName) {
-        return tables.get(tableName).getNextId();
-    }
-
-    @Override
-    public <T extends Prototype> Map<Long, T> selectFrom(String tableName) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        XmlTable<T> table = getTable(tableName);
-
-        return table.selectAll();
-    }
-
-    @Override
-    public <T extends Prototype> T selectFrom(String tableName, Long id) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        XmlTable<T> table = getTable(tableName);
-        return table.selectByKey(id);
-    }
-
-    @Override
-    public <T extends Prototype> Map<Long, T> selectFrom(String tableName, Predicate<T> filter) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        XmlTable<T> table = getTable(tableName);
-        return table.select(filter);
-    }
-
-    @Override
-    public <T extends Prototype> Long add(String tableName, T object) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        XmlTable<T> table = getTable(tableName);
-        Long id = table.getAndGenerateNextId();
-        table.put(id, object);
-
-        return id;
-    }
-
-    @Override
-    public <T extends Prototype> void insert(String tableName, Long id, T object) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        XmlTable<T> table = getTable(tableName);
-        table.put(id, object);
-    }
-
-    @Override
-    public <T extends Prototype> boolean update(String tableName, Long id, T object) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        XmlTable<T> table = getTable(tableName);
-
-        return table.replace(id, object);
-    }
-
-    @Override
-    public boolean deleteFrom(String tableName, Long id) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        return tables.get(tableName).remove(id);
-    }
-
-    private void deleteTableDir(String tableName) {
-        Path tableDirPath = tablesDir.resolve(tableName);
-        try {
-            FileUtils.deleteFileTree(tableDirPath);
-        } catch (IOException e) {
-            LOGGER.error("IO error occurred while trying to delete file tree of table directory " + tableName, e);
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private void updateMetadataFile(String tableName, Class<?> objectsType) {
+    private void registerTable(String tableName, Class<?> objectsType) {
         Pair<String, String> tablePropertiesPair = new Pair<>(tableName, objectsType.getName());
 
         String xml = toXml(tablePropertiesPair);
@@ -227,7 +101,8 @@ public class XmlDatabase implements Database {
         }
     }
 
-    private void createTablesFromMetadataFile() {
+    @Override
+    protected void createTablesFromMetadataFile() {
         List<String> tablePropertiesList;
         try {
             tablePropertiesList = Files.readAllLines(metadataFile);
@@ -249,29 +124,8 @@ public class XmlDatabase implements Database {
                 throw new InvalidObjectTypeException();
             }
             XmlTable<?> table = new XmlTable<>(objectsType, tableName, tablesDir, mapper);
-            table.initXmlTable(false);
+            table.initTable(false);
             tables.put(tableName, table);
-        }
-    }
-
-    private void cleanDatabaseDirectories() {
-        if (Files.exists(rootDir)) {
-            try {
-                FileUtils.deleteFileTree(rootDir);
-            } catch (IOException e) {
-                LOGGER.error("IO error occurred while trying to delete xml database root directory recursively", e);
-                throw new UncheckedIOException(e);
-            }
-        }
-    }
-
-    private void createDatabaseStructure() {
-        try {
-            Files.createDirectories(tablesDir);
-            Files.createFile(metadataFile);
-        } catch (IOException e) {
-            LOGGER.error("Cannot create database directory structure in file system", e);
-            throw new UncheckedIOException(e);
         }
     }
 
@@ -340,37 +194,5 @@ public class XmlDatabase implements Database {
             LOGGER.error("Error while trying deserialize object from xml string", e);
             throw new UncheckedIOException(e);
         }
-    }
-
-    private void checkDatabaseDirectoryStructure() {
-        if (!(Files.exists(rootDir) && Files.exists(tablesDir)) && Files.exists(metadataFile)) {
-            LOGGER.error("Xml database directory structure is invalid");
-            throw new InvalidDatabaseStructureException();
-        }
-    }
-
-    private void checkInitialization() {
-        if (!databaseInitialized) {
-            LOGGER.error("Database has to be initialized before working with it`s data");
-            throw new DatabaseNotInitializedException();
-        }
-    }
-
-    private void checkTablePresence(String tableName) {
-        if (!tables.containsKey(tableName)) {
-            LOGGER.error("Table with given name does not exist");
-            throw new NoSuchTableException();
-        }
-    }
-
-    private void checkTableAbsence(String tableName) {
-        if (tables.containsKey(tableName)) {
-            LOGGER.error("Table with given name already exists");
-            throw new TableAdditionException();
-        }
-    }
-
-    private <T> XmlTable<T> getTable(String tableName) {
-        return (XmlTable<T>) tables.get(tableName);
     }
 }

@@ -2,7 +2,9 @@ package com.gmail.at.rospopa.pavlo.projectmanager.domain;
 
 import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
 
-public abstract class Entity implements Prototype {
+import java.io.Serializable;
+
+public abstract class Entity implements Prototype, Serializable {
     private Long id;
 
     @Override

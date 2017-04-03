@@ -1,11 +1,9 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.json;
 
-import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.Database;
 import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.exception.*;
-import com.gmail.at.rospopa.pavlo.projectmanager.util.FileUtils;
+import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.AbstractFileDatabase;
 import com.gmail.at.rospopa.pavlo.projectmanager.util.Pair;
 import com.gmail.at.rospopa.pavlo.projectmanager.util.PropertiesLoader;
-import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import org.apache.logging.log4j.LogManager;
@@ -16,10 +14,8 @@ import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.nio.file.*;
 import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-public class JsonDatabase implements Database {
+public class JsonDatabase extends AbstractFileDatabase {
     private static final Logger LOGGER = LogManager.getLogger();
     private static Properties JSON_DB_PROP = PropertiesLoader.getInstance().getJsonDBProperties();
 
@@ -27,16 +23,8 @@ public class JsonDatabase implements Database {
     private static final String TABLES_DIR = JSON_DB_PROP.getProperty("json.database.tables.dir");
     private static final String METADATA_FILE_NAME = JSON_DB_PROP.getProperty("json.database.metadata.file");
 
-    private Path rootDir;
-    private Path metadataFile;
-    private Path tablesDir;
-
     private Gson gson;
-    private Type tablePropertiesPairType = new TypeToken<Pair<String, String>>(){}.getType();
-
-    private Map<String, JsonTable<?>> tables;
-    private boolean databaseInitialized;
-    private boolean rewriteOldData;
+    private Type tablePropertiesPairType = new TypeToken<Pair<String, String>>() {}.getType();
 
     public JsonDatabase(Path rootDirectoryPath, boolean rewriteOldData) {
         rootDir = rootDirectoryPath.resolve(ROOT_DIR);
@@ -51,40 +39,14 @@ public class JsonDatabase implements Database {
     }
 
     @Override
-    public void initDatabase() {
-        tables = new HashMap<>();
-
-        if (!rewriteOldData) {
-            checkDatabaseDirectoryStructure();
-            createTablesFromMetadataFile();
-        }
-        else {
-            cleanDatabaseDirectories();
-            createDatabaseStructure();
-        }
-        databaseInitialized = true;
-    }
-
-    @Override
-    public boolean isInitialized() {
-        return databaseInitialized;
-    }
-
-    @Override
-    public Set<String> getTableNames() {
-        checkInitialization();
-        return tables.keySet().stream().collect(Collectors.toSet());
-    }
-
-    @Override
-    public void createTable(String tableName, Class<? extends Prototype> objectsType) {
+    public void createTable(String tableName, Class<?> objectsType) {
         checkInitialization();
         checkTableAbsence(tableName);
 
         JsonTable<?> jsonTable = new JsonTable<>(objectsType, tableName, tablesDir, gson);
-        jsonTable.initJsonTable(true);
+        jsonTable.initTable(true);
         tables.put(tableName, jsonTable);
-        updateMetadataFile(tableName, objectsType);
+        registerTable(tableName, objectsType);
     }
 
     @Override
@@ -110,90 +72,6 @@ public class JsonDatabase implements Database {
         deleteTableDir(tableName);
     }
 
-    @Override
-    public void clearTable(String tableName) {
-        checkInitialization();
-        checkTablePresence(tableName);
-        tables.get(tableName).clear();
-    }
-
-    @Override
-    public boolean tableExists(String tableName) {
-        return tables.containsKey(tableName);
-    }
-
-    @Override
-    public Long getNextId(String tableName) {
-        return tables.get(tableName).getNextId();
-    }
-
-    @Override
-    public <T extends Prototype> Map<Long, T> selectFrom(String tableName) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        JsonTable<T> table = getTable(tableName);
-
-        return table.selectAll();
-    }
-
-    @Override
-    public <T extends Prototype> T selectFrom(String tableName, Long id) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        JsonTable<T> table = getTable(tableName);
-        return table.selectByKey(id);
-    }
-
-    @Override
-    public <T extends Prototype> Map<Long, T> selectFrom(String tableName, Predicate<T> filter) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        JsonTable<T> table = getTable(tableName);
-        return table.select(filter);
-    }
-
-    @Override
-    public <T extends Prototype> Long add(String tableName, T object) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        JsonTable<T> table = getTable(tableName);
-        Long id = table.getAndGenerateNextId();
-        table.put(id, object);
-
-        return id;
-    }
-
-    @Override
-    public <T extends Prototype> void insert(String tableName, Long id, T object) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        JsonTable<T> table = getTable(tableName);
-        table.put(id, object);
-    }
-
-    @Override
-    public <T extends Prototype> boolean update(String tableName, Long id, T object) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        JsonTable<T> table = getTable(tableName);
-
-        return table.replace(id, object);
-    }
-
-    @Override
-    public boolean deleteFrom(String tableName, Long id) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        return tables.get(tableName).remove(id);
-    }
-
     private void createGson() {
         JsonSerializer<java.sql.Date> dateSer = (src, typeOfSrc, context) ->
                 src == null ? null : new JsonPrimitive(src.getTime());
@@ -213,17 +91,7 @@ public class JsonDatabase implements Database {
                 .create();
     }
 
-    private void deleteTableDir(String tableName) {
-        Path tableDirPath = tablesDir.resolve(tableName);
-        try {
-            FileUtils.deleteFileTree(tableDirPath);
-        } catch (IOException e) {
-            LOGGER.error("IO error occurred while trying to delete file tree of table directory " + tableName, e);
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private void updateMetadataFile(String tableName, Class<?> objectsType) {
+    private void registerTable(String tableName, Class<?> objectsType) {
         Pair<String, String> tablePropertiesPair = new Pair<>(tableName, objectsType.getName());
 
         String json = gson.toJson(tablePropertiesPair, tablePropertiesPairType);
@@ -235,7 +103,8 @@ public class JsonDatabase implements Database {
         }
     }
 
-    private void createTablesFromMetadataFile() {
+    @Override
+    protected void createTablesFromMetadataFile() {
         List<String> tablePropertiesList;
         try {
             tablePropertiesList = Files.readAllLines(metadataFile);
@@ -253,66 +122,17 @@ public class JsonDatabase implements Database {
                 objectsType = Class.forName(className);
             } catch (ClassNotFoundException e) {
                 LOGGER.error(String.format("Cannot find and load class %s described in json db metadata file " +
-                                "for table %s", className, tableName), e);
+                        "for table %s", className, tableName), e);
                 throw new InvalidObjectTypeException();
             }
             JsonTable<?> table = new JsonTable<>(objectsType, tableName, tablesDir, gson);
-            table.initJsonTable(false);
+            table.initTable(false);
             tables.put(tableName, table);
         }
     }
 
-    private void cleanDatabaseDirectories() {
-        if (Files.exists(rootDir)) {
-            try {
-                FileUtils.deleteFileTree(rootDir);
-            } catch (IOException e) {
-                LOGGER.error("IO error occurred while trying to delete json database root directory recursively", e);
-                throw new UncheckedIOException(e);
-            }
-        }
-    }
-
-    private void createDatabaseStructure() {
-        try {
-            Files.createDirectories(tablesDir);
-            Files.createFile(metadataFile);
-        } catch (IOException e) {
-            LOGGER.error("Cannot create database directory structure in file system", e);
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private void checkDatabaseDirectoryStructure() {
-        if (!(Files.exists(rootDir) && Files.exists(tablesDir)) && Files.exists(metadataFile)) {
-            LOGGER.error("Json database directory structure is invalid");
-            throw new InvalidDatabaseStructureException();
-        }
-    }
-
-    private void checkInitialization() {
-        if (!databaseInitialized) {
-            LOGGER.error("Database has to be initialized before working with it`s data");
-            throw new DatabaseNotInitializedException();
-        }
-    }
-
-    private void checkTablePresence(String tableName) {
-        if (!tables.containsKey(tableName)) {
-            LOGGER.error("Table with given name does not exist");
-            throw new NoSuchTableException();
-        }
-    }
-
-    private void checkTableAbsence(String tableName) {
-        if (tables.containsKey(tableName)) {
-            LOGGER.error("Table with given name already exists");
-            throw new TableAdditionException();
-        }
-    }
-
-    private <T> JsonTable<T> getTable(String tableName) {
-        return (JsonTable<T>) tables.get(tableName);
+    @Override
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }
-

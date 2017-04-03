@@ -2,4 +2,5 @@
 target/
 json_db_root/
 xml_db_root/
+bin_db_root/
 project-manager.iml

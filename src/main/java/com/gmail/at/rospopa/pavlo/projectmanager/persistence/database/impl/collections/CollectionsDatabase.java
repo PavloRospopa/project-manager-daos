@@ -1,24 +1,19 @@
 package com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.collections;
 
-import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.Database;
-import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.exception.*;
-
+import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.exception.InvalidObjectTypeException;
+import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.AbstractDatabase;
+import com.gmail.at.rospopa.pavlo.projectmanager.persistence.database.impl.AbstractTable;
 import com.gmail.at.rospopa.pavlo.projectmanager.util.Prototype;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class CollectionsDatabase implements Database {
+public class CollectionsDatabase extends AbstractDatabase {
     private static final Logger LOGGER = LogManager.getLogger();
-
-    private Map<String, CollectionsTable<?>> tables;
-
-    private boolean databaseInitialized;
 
     @Override
     public void initDatabase() {
@@ -27,20 +22,15 @@ public class CollectionsDatabase implements Database {
     }
 
     @Override
-    public boolean isInitialized() {
-        return databaseInitialized;
-    }
-
-    @Override
-    public Set<String> getTableNames() {
-        checkInitialization();
-        return tables.keySet().stream().collect(Collectors.toSet());
-    }
-
-    @Override
-    public void createTable(String tableName, Class<? extends Prototype> objectsType) {
+    public void createTable(String tableName, Class<?> objectsType) {
         checkInitialization();
         checkTableAbsence(tableName);
+
+        if (!Prototype.class.isAssignableFrom(objectsType)) {
+            LOGGER.error("Trying to create table for storing objects of invalid type" +
+                    " (does not extend Prototype class)");
+            throw new InvalidObjectTypeException();
+        }
 
         tables.put(tableName, new CollectionsTable<>(objectsType));
     }
@@ -54,48 +44,23 @@ public class CollectionsDatabase implements Database {
     }
 
     @Override
-    public void clearTable(String tableName) {
+    public <T> Map<Long, T> selectFrom(String tableName) {
         checkInitialization();
         checkTablePresence(tableName);
 
-        CollectionsTable<?> table = tables.get(tableName);
-        table.clear();
-    }
-
-    @Override
-    public boolean tableExists(String tableName) {
-        checkInitialization();
-        return tables.containsKey(tableName);
-    }
-
-    @Override
-    public Long getNextId(String tableName) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        CollectionsTable<?> table = tables.get(tableName);
-
-        return table.getNextId();
-    }
-
-    @Override
-    public <T extends Prototype> Map<Long, T> selectFrom(String tableName) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        CollectionsTable<T> table = getTable(tableName);
+        AbstractTable<? extends Prototype> table = getTable(tableName);
 
         return table.selectAll().entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> (T) entry.getValue().clone()));
     }
 
     @Override
-    public <T extends Prototype> T selectFrom(String tableName, Long id) {
+    public <T> T selectFrom(String tableName, Long id) {
         checkInitialization();
         checkTablePresence(tableName);
 
-        CollectionsTable<T> table = getTable(tableName);
-        T object = table.selectByKey(id);
+        AbstractTable<? extends Prototype> table = getTable(tableName);
+        Prototype object = table.selectByKey(id);
         if (object != null) {
             return (T) object.clone();
         }
@@ -103,45 +68,44 @@ public class CollectionsDatabase implements Database {
     }
 
     @Override
-    public <T extends Prototype> Map<Long, T> selectFrom(String tableName, Predicate<T> filter) {
+    public <T> Map<Long, T> selectFrom(String tableName, Predicate<T> filter) {
         checkInitialization();
         checkTablePresence(tableName);
 
-        CollectionsTable<T> table = getTable(tableName);
+        Predicate<? extends Prototype> castedFilter = (Predicate<? extends Prototype>) filter;
+        return (Map<Long, T>) selectFromHelper(tableName, castedFilter);
+    }
+
+    private <K extends Prototype> Map<Long, K> selectFromHelper(String tableName, Predicate<K> filter) {
+        AbstractTable<K> table = getTable(tableName);
         return table.select(filter).entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> (T) entry.getValue().clone()));
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> (K) entry.getValue().clone()));
     }
 
     @Override
-    public  <T extends Prototype> Long add(String tableName, T object) {
+    public <T> Long add(String tableName, T object) {
         checkInitialization();
         checkTablePresence(tableName);
 
-        CollectionsTable<T> table = getTable(tableName);
+        Prototype o = (Prototype) object;
+
+        AbstractTable<T> table = getTable(tableName);
         Long id = table.getAndGenerateNextId();
-        T clone = (T) object.clone();
+        T clone = (T) o.clone();
         table.put(id, clone);
 
         return id;
     }
 
     @Override
-    public <T extends Prototype> void insert(String tableName, Long id, T object) {
+    public <T> boolean update(String tableName, Long id, T object) {
         checkInitialization();
         checkTablePresence(tableName);
 
-        CollectionsTable<T> table = getTable(tableName);
-        T clone = (T) object.clone();
-        table.put(id, clone);
-    }
+        Prototype o = (Prototype) object;
 
-    @Override
-    public <T extends Prototype> boolean update(String tableName, Long id, T object) {
-        checkInitialization();
-        checkTablePresence(tableName);
-
-        CollectionsTable<T> table = getTable(tableName);
-        T clone = (T) object.clone();
+        AbstractTable<T> table = getTable(tableName);
+        T clone = (T) o.clone();
 
         return table.replace(id, clone);
     }
@@ -151,33 +115,23 @@ public class CollectionsDatabase implements Database {
         checkInitialization();
         checkTablePresence(tableName);
 
-        CollectionsTable<?> table = tables.get(tableName);
-
-        return table.remove(id);
+        return tables.get(tableName).remove(id);
     }
 
-    private <T> CollectionsTable<T> getTable(String tableName) {
-        return (CollectionsTable<T>) tables.get(tableName);
+    @Override
+    protected <T> void insert(String tableName, Long id, T object) {
+        checkInitialization();
+        checkTablePresence(tableName);
+
+        Prototype o = (Prototype) object;
+
+        AbstractTable<T> table = getTable(tableName);
+        T clone = (T) o.clone();
+        table.put(id, clone);
     }
 
-    private void checkInitialization() {
-        if (!databaseInitialized) {
-            LOGGER.error("Database has to be initialized before working with it`s data");
-            throw new DatabaseNotInitializedException();
-        }
-    }
-
-    private void checkTablePresence(String tableName) {
-        if (!tables.containsKey(tableName)) {
-            LOGGER.error("Table with given name does not exist");
-            throw new NoSuchTableException();
-        }
-    }
-
-    private void checkTableAbsence(String tableName) {
-        if (tables.containsKey(tableName)) {
-            LOGGER.error("Table with given name already exists");
-            throw new TableAdditionException();
-        }
+    @Override
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }
